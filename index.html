@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Network Diagram — Educational</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #f5f7fa;
+    color: #1a1f2e;
+    min-height: 100vh;
+  }
+
+  .banner {
+    background: #1a1f2e;
+    color: white;
+    padding: 28px 40px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .banner-icon {
+    width: 48px; height: 48px;
+    background: #3b82f6;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+
+  .banner h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.3px; }
+  .banner p { font-size: 0.85rem; color: #94a3b8; margin-top: 2px; }
+
+  .badge {
+    margin-left: auto;
+    background: rgba(59,130,246,0.2);
+    border: 1px solid rgba(59,130,246,0.4);
+    color: #93c5fd;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 5px 14px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+
+  .page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 24px 60px;
+  }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+
+  .section-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #94a3b8;
+    margin-bottom: 16px;
+  }
+
+  /* Diagram card */
+  .diagram-col {
+    background: white;
+    border-radius: 16px;
+    padding: 28px 20px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    animation: fadeUp 0.5s ease 0.1s both;
+  }
+
+  .diagram {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .node {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    position: relative;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: default;
+  }
+  .node:hover { transform: translateY(-2px); }
+
+  .n-internet {
+    width: 190px; height: 50px;
+    border: 2px dashed #cbd5e1;
+    border-radius: 8px;
+    background: #f8fafc;
+    color: #64748b;
+  }
+
+  .n-modem {
+    width: 210px; height: 54px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    background: white;
+    color: #334155;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  }
+  .n-modem:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.1); }
+
+  .n-firewall {
+    width: 210px; height: 54px;
+    border: 2px solid #fca5a5;
+    border-radius: 10px;
+    background: #fff5f5;
+    color: #dc2626;
+    box-shadow: 0 2px 6px rgba(220,38,38,0.08);
+  }
+  .n-firewall:hover { box-shadow: 0 4px 14px rgba(220,38,38,0.15); }
+
+  .n-router {
+    width: 190px; height: 62px;
+    border: 2px solid #86efac;
+    border-radius: 50%;
+    background: #f0fdf4;
+    color: #16a34a;
+  }
+  .n-router:hover { box-shadow: 0 4px 14px rgba(22,163,74,0.15); }
+
+  .n-switch-wrap { width: 210px; }
+  .n-switch {
+    width: 100%; height: 52px;
+    border: 2px solid #93c5fd;
+    background: #eff6ff;
+    color: #1d4ed8;
+    clip-path: polygon(7% 0%, 100% 0%, 93% 100%, 0% 100%);
+  }
+  .n-switch:hover { box-shadow: 0 4px 14px rgba(29,78,216,0.12); }
+
+  .conn { display: flex; flex-direction: column; align-items: center; }
+  .conn-line {
+    width: 2px; height: 22px;
+    background: #cbd5e1;
+    position: relative;
+  }
+  .conn-line.arrow::after {
+    content: '';
+    position: absolute;
+    bottom: -5px; left: 50%;
+    transform: translateX(-50%);
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid #94a3b8;
+  }
+
+  .node-tip {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1a1f2e;
+    color: #e2e8f0;
+    font-size: 0.63rem;
+    font-family: 'DM Mono', monospace;
+    padding: 5px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    z-index: 10;
+  }
+  .node:hover .node-tip { opacity: 1; }
+
+  /* Departments */
+  .dept-area { width: 100%; }
+
+  .bus-wrapper { display: flex; justify-content: center; position: relative; height: 14px; }
+  .bus-h {
+    position: absolute;
+    top: 7px; left: 10%; right: 10%;
+    height: 2px;
+    border-top: 2px dashed #cbd5e1;
+  }
+
+  .dept-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+
+  .dept-item { display: flex; flex-direction: column; align-items: center; }
+  .dept-drop { width: 2px; height: 18px; background: #e2e8f0; }
+
+  .dept-box {
+    width: 100%;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    background: white;
+    padding: 10px 4px;
+    text-align: center;
+    font-size: 0.73rem;
+    font-weight: 700;
+    color: #334155;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    transition: all 0.2s;
+    cursor: default;
+  }
+  .dept-box:hover {
+    border-color: #3b82f6;
+    color: #1d4ed8;
+    box-shadow: 0 3px 10px rgba(59,130,246,0.12);
+    transform: translateY(-2px);
+  }
+  .dept-box.server { border-color: #86efac; background: #f0fdf4; color: #15803d; }
+  .dept-box.server:hover { border-color: #16a34a; box-shadow: 0 3px 10px rgba(22,163,74,0.15); }
+
+  .dept-emoji { font-size: 1rem; display: block; margin-bottom: 3px; }
+
+  .dept-ip {
+    margin-top: 5px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.58rem;
+    color: #94a3b8;
+    text-align: center;
+  }
+  .dept-ip.green { color: #16a34a; font-weight: 500; }
+
+  /* Legend */
+  .legend {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid #f1f5f9;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.65rem; color: #64748b; }
+  .legend-dot { width: 9px; height: 9px; border-radius: 2px; flex-shrink: 0; }
+
+  /* Right column */
+  .right-col { display: flex; flex-direction: column; gap: 20px; }
+
+  .info-card {
+    background: white;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  }
+
+  .info-card-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .ico {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .ico-blue { background: #eff6ff; }
+  .ico-red  { background: #fff5f5; }
+
+  .info-card-header h3 { font-size: 0.88rem; font-weight: 700; color: #1a1f2e; }
+  .info-card-header p  { font-size: 0.7rem; color: #94a3b8; margin-top: 1px; }
+
+  .info-card-body { padding: 16px 18px; }
+
+  /* IP Table */
+  .ip-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+  .ip-table th {
+    text-align: left;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #94a3b8;
+    padding: 0 0 10px;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .ip-table td { padding: 9px 0; border-bottom: 1px solid #f8fafc; vertical-align: middle; }
+  .ip-table tr:last-child td { border-bottom: none; }
+
+  .dept-tag { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; color: #334155; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+
+  .ip-code {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: #3b82f6;
+    background: #eff6ff;
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+  .ip-code.green { color: #16a34a; background: #f0fdf4; }
+
+  .role-pill { font-size: 0.62rem; font-weight: 600; padding: 2px 8px; border-radius: 10px; float: right; }
+  .pill-blue  { background: #eff6ff; color: #1d4ed8; }
+  .pill-gray  { background: #f1f5f9; color: #475569; }
+  .pill-green { background: #f0fdf4; color: #15803d; }
+
+  /* Flow steps */
+  .flow-steps { display: flex; flex-direction: column; gap: 0; }
+  .flow-step { display: flex; gap: 12px; align-items: flex-start; }
+  .flow-left { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+
+  .flow-circle {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: #eff6ff;
+    border: 2px solid #93c5fd;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #1d4ed8;
+    flex-shrink: 0;
+    z-index: 1;
+  }
+
+  .flow-vline { width: 2px; flex: 1; min-height: 18px; background: #e2e8f0; margin: 2px 0; }
+
+  .flow-content { padding: 3px 0 18px; }
+  .flow-title { font-size: 0.8rem; font-weight: 700; color: #1a1f2e; margin-bottom: 2px; }
+  .flow-desc  { font-size: 0.7rem; color: #64748b; line-height: 1.5; }
+
+  /* Security grid */
+  .sec-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .sec-item {
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 12px;
+    background: white;
+    transition: all 0.2s;
+    cursor: default;
+  }
+  .sec-item:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 3px 10px rgba(59,130,246,0.08);
+    transform: translateY(-1px);
+  }
+
+  .sec-icon  { font-size: 1rem; display: block; margin-bottom: 4px; }
+  .sec-num   { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: #cbd5e1; margin-bottom: 3px; }
+  .sec-title { font-size: 0.74rem; font-weight: 700; color: #1a1f2e; margin-bottom: 4px; line-height: 1.3; }
+  .sec-desc  { font-size: 0.65rem; color: #64748b; line-height: 1.5; }
+
+  /* Animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .right-col > *:nth-child(1) { animation: fadeUp 0.5s ease 0.2s both; }
+  .right-col > *:nth-child(2) { animation: fadeUp 0.5s ease 0.35s both; }
+  .right-col > *:nth-child(3) { animation: fadeUp 0.5s ease 0.5s both; }
+
+  @media (max-width: 800px) {
+    .two-col { grid-template-columns: 1fr; }
+    .sec-grid { grid-template-columns: 1fr; }
+    .dept-grid { grid-template-columns: repeat(2, 1fr); }
+    .banner { padding: 20px; }
+    .badge { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="banner">
+  <div class="banner-icon">🌐</div>
+  <div>
+    <h1>Network Architecture Diagram</h1>
+    <p>Infrastructure Topology — Department Overview &amp; Security Layers</p>
+  </div>
+  <span class="badge">Subnet: 192.168.5.0/24</span>
+</div>
+
+<div class="page">
+  <div class="two-col">
+
+    <!-- Diagram -->
+    <div class="diagram-col">
+      <div class="section-label">Network Topology</div>
+      <div class="diagram">
+
+        <div class="node n-internet">
+          <span>🌍</span> Internet
+          <div class="node-tip">Public Internet — Outside world</div>
+        </div>
+
+        <div class="conn"><div class="conn-line arrow"></div></div>
+
+        <div class="node n-modem">
+          <span>📡</span> ISP Modem
+          <div class="node-tip">Converts ISP signal to Ethernet</div>
+        </div>
+
+        <div class="conn"><div class="conn-line arrow"></div></div>
+
+        <div class="node n-firewall">
+          <span>🔥</span> Firewall
+          <div class="node-tip">Blocks unauthorized traffic</div>
+        </div>
+
+        <div class="conn"><div class="conn-line arrow"></div></div>
+
+        <div class="node n-router">
+          <span>🔀</span> Router
+          <div class="node-tip">Routes traffic between networks</div>
+        </div>
+
+        <div class="conn"><div class="conn-line arrow"></div></div>
+
+        <div class="n-switch-wrap">
+          <div class="node n-switch">
+            <span>🔌</span> Switch
+            <div class="node-tip">Distributes LAN to all departments</div>
+          </div>
+        </div>
+
+        <div class="conn"><div class="conn-line" style="height:12px"></div></div>
+
+        <div class="dept-area">
+          <div class="bus-wrapper"><div class="bus-h"></div></div>
+          <div class="dept-grid">
+            <div class="dept-item">
+              <div class="dept-drop"></div>
+              <div class="dept-box"><span class="dept-emoji">🏢</span>Admin</div>
+              <div class="dept-ip">192.168.5.19</div>
+            </div>
+            <div class="dept-item">
+              <div class="dept-drop"></div>
+              <div class="dept-box"><span class="dept-emoji">💼</span>Sale</div>
+              <div class="dept-ip">192.168.5.29</div>
+            </div>
+            <div class="dept-item">
+              <div class="dept-drop"></div>
+              <div class="dept-box"><span class="dept-emoji">💻</span>IT</div>
+              <div class="dept-ip">192.168.5.39</div>
+            </div>
+            <div class="dept-item">
+              <div class="dept-drop"></div>
+              <div class="dept-box server"><span class="dept-emoji">🖥️</span>Server</div>
+              <div class="dept-ip green">Can expand</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#dc2626"></div>Firewall</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#16a34a"></div>Router</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#1d4ed8"></div>Switch</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#94a3b8;border-radius:50%"></div>Department</div>
+      </div>
+    </div>
+
+    <!-- Right panels -->
+    <div class="right-col">
+
+      <!-- IP Table -->
+      <div class="info-card">
+        <div class="info-card-header">
+          <div class="ico ico-blue">📋</div>
+          <div>
+            <h3>IP Address Assignment</h3>
+            <p>All devices on subnet 192.168.5.0/24</p>
+          </div>
+        </div>
+        <div class="info-card-body">
+          <table class="ip-table">
+            <thead>
+              <tr><th>Department</th><th>IP Address</th><th>Role</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="dept-tag"><span class="dot" style="background:#3b82f6"></span>Admin</span></td>
+                <td><span class="ip-code">192.168.5.19</span></td>
+                <td><span class="role-pill pill-gray">Management</span></td>
+              </tr>
+              <tr>
+                <td><span class="dept-tag"><span class="dot" style="background:#f59e0b"></span>Sale</span></td>
+                <td><span class="ip-code">192.168.5.29</span></td>
+                <td><span class="role-pill pill-gray">Sales</span></td>
+              </tr>
+              <tr>
+                <td><span class="dept-tag"><span class="dot" style="background:#8b5cf6"></span>IT</span></td>
+                <td><span class="ip-code">192.168.5.39</span></td>
+                <td><span class="role-pill pill-blue">Network Admin</span></td>
+              </tr>
+              <tr>
+                <td><span class="dept-tag"><span class="dot" style="background:#16a34a"></span>Server</span></td>
+                <td><span class="ip-code green">Expandable</span></td>
+                <td><span class="role-pill pill-green">Resource Hub</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- How data flows -->
+      <div class="info-card">
+        <div class="info-card-header">
+          <div class="ico ico-blue">⚡</div>
+          <div>
+            <h3>How Data Flows</h3>
+            <p>Step-by-step connection path explained</p>
+          </div>
+        </div>
+        <div class="info-card-body">
+          <div class="flow-steps">
+            <div class="flow-step">
+              <div class="flow-left"><div class="flow-circle">1</div><div class="flow-vline"></div></div>
+              <div class="flow-content">
+                <div class="flow-title">Internet → ISP Modem</div>
+                <div class="flow-desc">Your ISP delivers a public IP and converts the signal to Ethernet for your local network.</div>
+              </div>
+            </div>
+            <div class="flow-step">
+              <div class="flow-left"><div class="flow-circle">2</div><div class="flow-vline"></div></div>
+              <div class="flow-content">
+                <div class="flow-title">Modem → Firewall</div>
+                <div class="flow-desc">All traffic is inspected here. Dangerous or unauthorized packets are blocked before entering.</div>
+              </div>
+            </div>
+            <div class="flow-step">
+              <div class="flow-left"><div class="flow-circle">3</div><div class="flow-vline"></div></div>
+              <div class="flow-content">
+                <div class="flow-title">Firewall → Router</div>
+                <div class="flow-desc">Clean traffic is routed using NAT — internal IPs stay hidden from the outside world.</div>
+              </div>
+            </div>
+            <div class="flow-step">
+              <div class="flow-left"><div class="flow-circle">4</div><div class="flow-vline"></div></div>
+              <div class="flow-content">
+                <div class="flow-title">Router → Switch</div>
+                <div class="flow-desc">The switch distributes the connection to all departments through its ports.</div>
+              </div>
+            </div>
+            <div class="flow-step">
+              <div class="flow-left"><div class="flow-circle">5</div></div>
+              <div class="flow-content">
+                <div class="flow-title">Switch → Departments</div>
+                <div class="flow-desc">Each department communicates internally without going through the internet. Fast and private.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Security -->
+      <div class="info-card">
+        <div class="info-card-header">
+          <div class="ico ico-red">🔒</div>
+          <div>
+            <h3>What Makes It More Secure</h3>
+            <p>10 security layers for a stronger network</p>
+          </div>
+        </div>
+        <div class="info-card-body">
+          <div class="sec-grid">
+            <div class="sec-item">
+              <span class="sec-icon">🏛️</span>
+              <div class="sec-num">01</div>
+              <div class="sec-title">Physical Security</div>
+              <div class="sec-desc">Lock server room. Disable unused ports. CCTV monitoring.</div>
+            </div>
+            <div class="sec-item">
+              <span class="sec-icon">🔑</span>
+              <div class="sec-num">02</div>
+              <div class="sec-title">Strong Auth (2FA)</div>
+              <div class="sec-desc">12+ char passwords. Change every 90 days. Two-factor enabled.</div>
+            </div>
+            <div class="sec-item">
+              <span class="sec-icon">🧱</span>
+              <div class="sec-num">03</div>
+              <div class="sec-title">VLANs</div>
+              <div class="sec-desc">Separate each department. Virus stays isolated internally.</div>
+            </div>
+            <div class="sec-item">
+              <span class="sec-icon">🔥</span>
+              <div class="sec-num">04</div>
+              <div class="sec-title">Firewall Rules</div>
+              <div class="sec-desc">Block all by default. Whitelist only known IPs and ports.</div>
+            </div>
+            <div class="sec-item">
+              <span class="sec-icon">🔐</span>
+              <div class="sec-num">05</div>
+              <div class="sec-title">Encryption</div>
+              <div class="sec-desc">HTTPS everywhere. Encrypted drives. VPN for remote access.</div>
+            </div>
+            <div class="sec-item">
+              <span class="sec-icon">🔄</span>
+              <div class="sec-num">06</div>
+              <div class="sec-title">Patch Management</div>
+              <div class="sec-desc">OS updated monthly. Antivirus daily. Server patched on release.</div>
+            </div>
+            <div class="sec-item">
+              <span class="sec-icon">🛡️</span>
+              <div class="sec-num">07</div>
+              <div class="sec-title">Antivirus</div>
+              <div class="sec-desc">Centrally managed by IT across all department machines.</div>
+            </div>
+            <div class="sec-item">
+              <span class="sec-icon">💾</span>
+              <div class="sec-num">08</div>
+              <div class="sec-title">Backups (3-2-1)</div>
+              <div class="sec-desc">3 copies, 2 storage types, 1 offsite. Nightly automated.</div>
+            </div>
+            <div class="sec-item">
+              <span class="sec-icon">📊</span>
+              <div class="sec-num">09</div>
+              <div class="sec-title">Monitoring</div>
+              <div class="sec-desc">24/7 logging. Alerts on unknown IPs. Zabbix, Wireshark.</div>
+            </div>
+            <div class="sec-item">
+              <span class="sec-icon">👩‍🏫</span>
+              <div class="sec-num">10</div>
+              <div class="sec-title">Staff Training</div>
+              <div class="sec-desc">Phishing awareness. Never share passwords. Report incidents.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
